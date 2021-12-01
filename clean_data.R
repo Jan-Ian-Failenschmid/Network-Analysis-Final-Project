@@ -1,9 +1,5 @@
 clean_data <- function(inp) {
   
-  # Loads required packages
-  library(tidyverse)
-  library(haven)
-  
   # Loads the data
   raw_df <- read_spss(inp)
   
@@ -49,18 +45,18 @@ clean_data <- function(inp) {
   
   
   # Removes all cases which were not assessed in all waives (works for now, should be moved up before variable selection might otherwice cause problems later)
-  names_avar <- names(df_clean)[!names(df_clean) %in% c("ID", "yearID", "age", "sex", "wrkstat", "degree")]
+  names_avar <- names(df_clean)[!names(df_clean) %in% c("ID", "yearID", "age", "sex", "wrkstat", "degree", "race")]
   exclude <- unique(df_clean$ID[rowSums(is.na(df_clean[names(df_clean) %in% names_avar])) == ncol(df_clean[names(df_clean) %in% names_avar])])
   df_clean <- filter(df_clean, !df_clean$ID %in% exclude)
   
-  return(df_clean)
+  # Exclude people outside the working range
+  ind_age <- df_clean[which(df_clean$yearID == 2010 & df_clean$age < 67),]
+  data_age <- df_clean[which(df_clean$ID %in% ind_age$ID),]
+  
+  ##drop rows with too much missing data
+  df_rows <- data_age[which(rowMeans(!is.na(data_age[ ,8:32])) > 0.50), ]
+  
+  return(df_rows)
 }
 
-data <- clean_data(file.choose())
 
-##drop people older than 66 from panel
-ind_age <- data[which(data$yearID == 2010 & data$age < 67),]
-data_age <- data[which(data$ID %in% ind_age$ID),]
-
-##drop rows with too much missing data
-df_rows <- data_age[which(rowMeans(!is.na(data_age[,9:32])) > 0.60),]
