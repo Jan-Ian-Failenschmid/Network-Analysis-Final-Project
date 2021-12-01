@@ -49,7 +49,7 @@ clean_data <- function(inp) {
   
   
   # Removes all cases which were not assessed in all waives (works for now, should be moved up before variable selection might otherwice cause problems later)
-  names_avar <- names(df_clean)[!names(df_clean) %in% c("ID", "yearID", "age", "sex", "wrkstat", "degree")]
+  names_avar <- names(df_clean)[!names(df_clean) %in% c("ID", "yearID", "age", "sex", "wrkstat", "degree", "race")]
   exclude <- unique(df_clean$ID[rowSums(is.na(df_clean[names(df_clean) %in% names_avar])) == ncol(df_clean[names(df_clean) %in% names_avar])])
   df_clean <- filter(df_clean, !df_clean$ID %in% exclude)
   
@@ -63,4 +63,6 @@ ind_age <- data[which(data$yearID == 2010 & data$age < 67),]
 data_age <- data[which(data$ID %in% ind_age$ID),]
 
 ##drop rows with too much missing data
-df_rows <- data_age[which(rowMeans(!is.na(data_age[,9:32])) > 0.60),]
+df_rows <- data_age[which(rowMeans(!is.na(data_age[,8:32])) > 0.50),]
+
+
