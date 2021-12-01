@@ -53,8 +53,14 @@ clean_data <- function(inp) {
   ind_age <- df_clean[which(df_clean$yearID == 2010 & df_clean$age < 67),]
   data_age <- df_clean[which(df_clean$ID %in% ind_age$ID),]
   
-  ##drop rows with too much missing data
+  # Drop observations with too much missing data
   df_rows <- data_age[which(rowMeans(!is.na(data_age[ ,8:32])) > 0.50), ]
   
-  return(df_rows)
+  # Get subjects with observations in all years 
+  ID_all <- df_rows %>%
+    count(ID) %>%
+    filter(n == 3)
+  df_all <- df_rows[which(df_rows$ID %in% ID_all$ID),]
+  
+  return(df_all)
 }
