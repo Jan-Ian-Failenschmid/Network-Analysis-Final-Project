@@ -32,15 +32,13 @@ clean_data <- function(inp) {
   
   # Selects relevant variables
   df_clean <- select(df, c(
-    ID, yearID,
-    age, sex, wrkstat, partyid, posslq, degree, educ, born,
+    ID, yearID, age, sex, race, wrkstat, degree,  
     eqwlth, liveblks, livewhts, marblk, marwht, marasian,
-    marhisp, wrkwayup, nextgen, toofast, advfront, socrel,
-    socommun, socfrend, satjob, parsol, kidssol, goodlife,
-    premarsx, teensex, xmarsex, homosex, pillok, marhomo,
-    spanking, fechld, fepresch, fefam, meovrwrk, punsin,
-    blkwhite, rotapple, permoral, incom16, finrela, polviews,
-    happy, joblose, news, relpersn, sprtprsn, nanotech
+    marhisp, wrkwayup, socrel, socommun, socfrend, parsol, 
+    kidssol, goodlife, premarsx, teensex, xmarsex, homosex, pillok,
+    marhomo, spanking, fechld, fepresch, fefam, meovrwrk, punsin,
+    blkwhite, rotapple, permoral, finrela, polviews,
+    happy, news, relpersn, sprtprsn
   ))
   
   # Removes variables which have all Na's in one year
@@ -50,6 +48,7 @@ clean_data <- function(inp) {
     names(colSums(!is.na(df_clean[df_clean$yearID == 2010, ]))[colSums(!is.na(df_clean[df_clean$yearID == 2010, ])) == 0])
   )))
   
+  
   # Removes all cases which were not assessed in all waives (works for now, should be moved up before variable selection might otherwice cause problems later)
   names_avar <- names(df_clean)[!names(df_clean) %in% c("ID", "yearID", "age", "sex", "wrkstat", "partyid", "posslq", "degree", "educ", "born")]
   exclude <- unique(df_clean$ID[rowSums(is.na(df_clean[names(df_clean) %in% names_avar])) == ncol(df_clean[names(df_clean) %in% names_avar])])
@@ -57,4 +56,16 @@ clean_data <- function(inp) {
   
   return(df_clean)
 }
+
+data <- clean_data(file.choose())
+
+##drop people older than 66 from panel
+ind_age <- data[which(data$yearID == 2010 & data$age < 67),]
+data_age <- data[which(data$ID %in% ind_age$ID),]
+
+##drop rows with too much missing data
+df_rows <- data_age[which(rowMeans(!is.na(data_age)) > 0.50),]
+
+##drop cols with too much missing data
+df_cols <- df_rows[, which(colMeans(!is.na(df_rows)) > 0.65)]
 
