@@ -1,0 +1,60 @@
+clean_data <- function(inp) {
+  
+  # Loads required packages
+  library(tidyverse)
+  library(haven)
+  
+  # Loads the data
+  raw_df <- read_spss(inp)
+  
+  # Adds an unique identifier for each person
+  raw_df$ID <- c(1:2000)
+  
+  # Splits up the data set into separate data sets for years 2006, 2008, 2010
+  df2006 <- select(raw_df, c(ID, ends_with("_1")))
+  df2008 <- select(raw_df, c(ID, ends_with("_2"))) %>%
+    select(!c(intrace_2, indus_2, panstat_2))
+  df2010 <- select(raw_df, c(ID, ends_with("_3"))) %>%
+    select(!c(intrace_3, panstat_3))
+  
+  # Adds a year identifier to each seperate data file
+  df2006$yearID <- 2006
+  df2008$yearID <- 2008
+  df2010$yearID <- 2010
+  
+  # Removes the waive identifier from the names
+  names(df2006)[names(df2006) != "ID" & names(df2006) != "yearID"] <- sub("_1", "", names(df2006)[names(df2006) != "ID" & names(df2006) != "yearID"])
+  names(df2008)[names(df2008) != "ID" & names(df2008) != "yearID"] <- sub("_2", "", names(df2008)[names(df2008) != "ID" & names(df2008) != "yearID"])
+  names(df2010)[names(df2010) != "ID" & names(df2010) != "yearID"] <- sub("_3", "", names(df2010)[names(df2010) != "ID" & names(df2010) != "yearID"])
+  
+  # Combine the three waves
+  df <- bind_rows(df2006, df2008, df2010)
+  
+  # Selects relevant variables
+  df_clean <- select(df, c(
+    ID, yearID,
+    age, sex, wrkstat, partyid, posslq, degree, educ, born,
+    eqwlth, liveblks, livewhts, marblk, marwht, marasian,
+    marhisp, wrkwayup, nextgen, toofast, advfront, socrel,
+    socommun, socfrend, satjob, parsol, kidssol, goodlife,
+    premarsx, teensex, xmarsex, homosex, pillok, marhomo,
+    spanking, fechld, fepresch, fefam, meovrwrk, punsin,
+    blkwhite, rotapple, permoral, incom16, finrela, polviews,
+    happy, joblose, news, relpersn, sprtprsn, nanotech
+  ))
+  
+  # Removes variables which have all Na's in one year
+  df_clean <- select(df_clean, !unique(c(
+    names(colSums(!is.na(df_clean[df_clean$yearID == 2006, ]))[colSums(!is.na(df_clean[df_clean$yearID == 2006, ])) == 0]),
+    names(colSums(!is.na(df_clean[df_clean$yearID == 2008, ]))[colSums(!is.na(df_clean[df_clean$yearID == 2008, ])) == 0]),
+    names(colSums(!is.na(df_clean[df_clean$yearID == 2010, ]))[colSums(!is.na(df_clean[df_clean$yearID == 2010, ])) == 0])
+  )))
+  
+  # Removes all cases which were not assessed in all waives (works for now, should be moved up before variable selection might otherwice cause problems later)
+  names_avar <- names(df_clean)[!names(df_clean) %in% c("ID", "yearID", "age", "sex", "wrkstat", "partyid", "posslq", "degree", "educ", "born")]
+  exclude <- unique(df_clean$ID[rowSums(is.na(df_clean[names(df_clean) %in% names_avar])) == ncol(df_clean[names(df_clean) %in% names_avar])])
+  df_clean <- filter(df_clean, !df_clean$ID %in% exclude)
+  
+  return(df_clean)
+}
+
