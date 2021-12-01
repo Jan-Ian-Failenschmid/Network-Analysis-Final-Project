@@ -44,17 +44,23 @@ clean_data <- function(inp) {
   )))
   
   
-  # Removes all cases which were not assessed in all waives (works for now, should be moved up before variable selection might otherwice cause problems later)
+  # Removes all cases which were not assessed in all waves (works for now, should be moved up before variable selection might otherwise cause problems later)
   names_avar <- names(df_clean)[!names(df_clean) %in% c("ID", "yearID", "age", "sex", "wrkstat", "degree", "race")]
   exclude <- unique(df_clean$ID[rowSums(is.na(df_clean[names(df_clean) %in% names_avar])) == ncol(df_clean[names(df_clean) %in% names_avar])])
   df_clean <- filter(df_clean, !df_clean$ID %in% exclude)
   
   # Exclude people outside the working range
-  ind_age <- df_clean[which(df_clean$yearID == 2010 & df_clean$age < 67),]
+  ind_age <- df_clean[which(df_clean$yearID == 2006 & df_clean$age < 63),]
   data_age <- df_clean[which(df_clean$ID %in% ind_age$ID),]
   
+  ind_age2 <- data_age[which(data_age$yearID == 2008 & data_age$age < 65),]
+  data_age2 <- data_age[which(data_age$ID %in% ind_age2$ID),]
+  
+  ind_age3 <- data_age2[which(data_age2$yearID == 2010 & data_age2$age < 67),]
+  data_age3 <- data_age2[which(data_age2$ID %in% ind_age3$ID),]
+  
   # Drop observations with too much missing data
-  df_rows <- data_age[which(rowMeans(!is.na(data_age[ ,8:32])) > 0.50), ]
+  df_rows <- data_age3[which(rowMeans(!is.na(data_age3[ ,8:32])) > 0.50), ]
   
   # Get subjects with observations in all years 
   ID_all <- df_rows %>%
