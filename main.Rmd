@@ -1,0 +1,79 @@
+---
+title: "Network Analysis Results"
+author: "Jan Failenschmid (13869159), Daniel van der Meer (12227056), Dana Sleiffer (12767298)"
+date: "01.12.2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(haven)
+library(psych)
+library(knitr)
+source("clean_data.r")
+```
+
+```{r}
+df_clean <- clean_data("data/GSS_panel06w123_R6a - SPSS.sav")
+```
+
+**Table 1**  
+*Descriptives of the Sample Demographics by Year*
+```{r}
+kable(describe(df_clean[df_clean$yearID == 2006, 3:7]))
+kable(describe(df_clean[df_clean$yearID == 2008, 3:7]))
+kable(describe(df_clean[df_clean$yearID == 2010, 3:7]))
+```
+
+**Table 2**  
+*Descriptives of the Analysis Variables by Year*
+```{r}
+kable(describe(df_clean[df_clean$yearID == 2006, 8:32]))
+kable(describe(df_clean[df_clean$yearID == 2008, 8:32]))
+kable(describe(df_clean[df_clean$yearID == 2010, 8:32]))
+```
+
+**Graph 1**  
+*Histograms of Sample Demographics by Year*
+```{r, warning = FALSE}
+ggplot(gather(df_clean[df_clean$yearID == 2006, 3:7]), aes(value)) +
+  geom_histogram() +
+  facet_wrap(~key, scales = "free_x") +
+  theme_classic() + 
+  xlab("Response")
+
+ggplot(gather(df_clean[df_clean$yearID == 2008, 3:7]), aes(value)) +
+  geom_histogram() +
+  facet_wrap(~key, scales = "free_x") +
+  theme_classic() + 
+  xlab("Response")
+
+ggplot(gather(df_clean[df_clean$yearID == 2010, 3:7]), aes(value)) +
+  geom_histogram() +
+  facet_wrap(~key, scales = "free_x") +
+  theme_classic() + 
+  xlab("Response")
+```
+
+**Graph 2**  
+*Histograms of Analysis Variables by Year*
+```{r, warning = FALSE}
+ggplot(gather(df_clean[df_clean$yearID == 2006, 8:32]), aes(value)) +
+  geom_histogram() +
+  facet_wrap(~key, scales = "free_x") +
+  theme_classic() + 
+  xlab("Response")
+
+ggplot(gather(df_clean[df_clean$yearID == 2008, 8:32]), aes(value)) +
+  geom_histogram() +
+  facet_wrap(~key, scales = "free_x") +
+  theme_classic() + 
+  xlab("Response")
+
+ggplot(gather(df_clean[df_clean$yearID == 2010, 8:32]), aes(value)) +
+  geom_histogram() +
+  facet_wrap(~key, scales = "free_x") +
+  theme_classic() + 
+  xlab("Response")
+```
