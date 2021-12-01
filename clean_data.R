@@ -58,5 +58,3 @@ clean_data <- function(inp) {
   
   return(df_rows)
 }
-
-
