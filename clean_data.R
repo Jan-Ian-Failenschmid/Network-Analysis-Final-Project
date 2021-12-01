@@ -32,13 +32,12 @@ clean_data <- function(inp) {
   
   # Selects relevant variables
   df_clean <- select(df, c(
-    ID, yearID, age, sex, race, wrkstat, degree,  
-    eqwlth, liveblks, livewhts, marblk, marwht, marasian,
-    marhisp, wrkwayup, socrel, socommun, socfrend, parsol, 
-    kidssol, goodlife, premarsx, teensex, xmarsex, homosex, pillok,
-    marhomo, spanking, fechld, fepresch, fefam, meovrwrk, punsin,
-    blkwhite, rotapple, permoral, finrela, polviews,
-    happy, news, relpersn, sprtprsn
+    ID, yearID,
+    age, sex, wrkstat, degree, race,
+    eqwlth, marblk, marwht, marasian, marhisp, marhomo, 
+    socrel, socommun, socfrend, parsol, kidssol, goodlife,
+    fechld, fepresch, fefam, punsin, blkwhite, rotapple, permoral,
+    finrela, polviews, happy, news, relpersn, sprtprsn
   ))
   
   # Removes variables which have all Na's in one year
@@ -50,7 +49,7 @@ clean_data <- function(inp) {
   
   
   # Removes all cases which were not assessed in all waives (works for now, should be moved up before variable selection might otherwice cause problems later)
-  names_avar <- names(df_clean)[!names(df_clean) %in% c("ID", "yearID", "age", "sex", "wrkstat", "partyid", "posslq", "degree", "educ", "born")]
+  names_avar <- names(df_clean)[!names(df_clean) %in% c("ID", "yearID", "age", "sex", "wrkstat", "degree")]
   exclude <- unique(df_clean$ID[rowSums(is.na(df_clean[names(df_clean) %in% names_avar])) == ncol(df_clean[names(df_clean) %in% names_avar])])
   df_clean <- filter(df_clean, !df_clean$ID %in% exclude)
   
@@ -64,8 +63,4 @@ ind_age <- data[which(data$yearID == 2010 & data$age < 67),]
 data_age <- data[which(data$ID %in% ind_age$ID),]
 
 ##drop rows with too much missing data
-df_rows <- data_age[which(rowMeans(!is.na(data_age)) > 0.50),]
-
-##drop cols with too much missing data
-df_cols <- df_rows[, which(colMeans(!is.na(df_rows)) > 0.65)]
-
+df_rows <- data_age[which(rowMeans(!is.na(data_age[,9:32])) > 0.60),]
