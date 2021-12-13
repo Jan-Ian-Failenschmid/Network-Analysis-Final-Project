@@ -11,7 +11,12 @@ library(tidyverse)
 library(haven)
 library(psych)
 library(knitr)
-source("clean_data.r")
+library("semPlot")
+library("psychonetrics")
+library("xtable")
+library("qgraph")
+sapply(c("clean_data.r", "return_model.r", "model_search_algorithm.r", 
+         "helperFunctions.R"), source)
 ```
 
 ```{r}
@@ -25,11 +30,11 @@ kable(describe(df_clean[df_clean$yearID == 2006, 3:7]))
 kable(describe(df_clean[df_clean$yearID == 2008, 3:7]))
 kable(describe(df_clean[df_clean$yearID == 2010, 3:7]))
 ```
-
+  
 **Table 2**  
 *Descriptives of the Analysis Variables by Year*
 ```{r}
-kable(describe(df_clean[df_clean$yearID == 2006, 8:32]))
+kable(describe(df_clean[df_clean$yearID == 2006, 8:32]))  
 kable(describe(df_clean[df_clean$yearID == 2008, 8:32]))
 kable(describe(df_clean[df_clean$yearID == 2010, 8:32]))
 ```
@@ -77,3 +82,206 @@ ggplot(gather(df_clean[df_clean$yearID == 2010, 8:32]), aes(value)) +
   theme_classic() + 
   xlab("Response")
 ```
+
+```{r}
+## Fit model to the data
+
+#Fit Model
+model <- return_model(df_clean)
+model <- model %>% runmodel
+# Check fit:
+model %>% print
+model %>% fit
+model %>% parameters()
+```
+
+```{r}
+## Perform Model Search
+
+#Model Search #Doesn't work right now
+model_pruned <- model_search_algorithm(model)
+# Save model:
+saveRDS(model_pruned, file="Results.RDS")
+```
+
+```{r}
+## Plot and Save latent variable Loading's
+
+# Load results:
+analysis <- readRDS("Results.RDS")
+
+# FACTOR LOADINGS
+
+# Standardize at the within-subject level
+
+# Unstandardized factor loadings:
+lambda <- getmatrix(analysis, "lambda")
+
+# Residual variances:
+theta <- getmatrix(analysis, "sigma_epsilon_within")
+
+# Latent variance-covariance:
+psi <- getmatrix(analysis, "sigma_zeta_within")
+
+# Use semPlot to standardize:
+semPlot_mod <- lisrelModel(LY = lambda, TE = theta, PS = psi)
+modMats <- modelMatrices(semPlot_mod, "Mplus")
+lambdastd <- modMats$Lambda[[1]]$std
+
+# Number of latents:
+nLat <- ncol(lambdastd)
+
+# Number of observed:
+nObs <- nrow(lambdastd)
+
+# Edgelist for graph:
+Edgelist <- cbind(
+  c(col(lambdastd)),c(row(lambdastd))+ncol(lambdastd),c(lambdastd)
+)
+
+# shape:
+shape <- c(rep("ellipse",nLat),rep("rectangle",nObs))
+
+# Size1:
+size1 <-  c(rep(18,nLat),rep(5,nObs))
+            
+# Size2:
+size2 <-  c(rep(10,nLat),rep(5,nObs))
+
+# Edge connect points:
+ECP <- Edgelist
+ECP[,1] <- NA # 0.5*pi
+ECP[,2] <- 0
+
+#Latent Labels
+latLabels <-  c(
+  "Racial/Homosexual Attitudes", "Time with Others", "Standard of Living",
+  "Attitude Towards Mothers Working", "Religiousness", "Morals", "Politics/News"
+)
+
+#Manifest Labels
+manLabels <- names(df_clean[8:32])
+
+# Size of labels:
+labelCex <- c(
+  rep(1.5,nLat),
+  rep(1,nObs)
+)
+
+# Starting layout:
+Layout <- rbind(
+  cbind(
+    # seq(-1,1,length=nLat+2)[-c(1,nLat+2)],
+    seq(-0.8,0.8,length=nLat),
+    1
+  ),
+  cbind(
+    seq(-1,1,length=nObs+2)[-c(1,nObs+2)],
+    0
+  )
+)
+
+
+
+# Plot and save to PDF:
+qgraph(Edgelist,
+       shape = shape,
+       vsize = size1,
+       vsize2 = size2,
+       layout = Layout,
+       mar = c(4,1,7,1),
+       edgeConnectPoints = ECP,
+       labels = c(latLabels, manLabels),
+       label.scale = FALSE,
+       label.cex = labelCex,
+       asize = 5,
+       theme = "colorblind",
+       filetype = "pdf",
+       filename = "panelloadings",
+       width = 15,
+       height = 3,
+       cut = 0)
+```
+
+```{r}
+#Get NETWORKS
+temporal <- getmatrix(analysis, "PDC")
+
+contemporaneous <- getmatrix(analysis, "omega_zeta_within")
+
+between <- getmatrix(analysis, "omega_zeta_between")
+
+# Loop rotation:
+loopRotation <- rep(NA, 6)
+loopRotation[3] <- 0.8 * pi
+
+latLabels <-  c(
+  "RA", "TA", "SL", "ATMW", "R", "M", "P/N"
+)
+```
+
+```{r}
+# Plot all graphs:
+max <- max(c(abs(temporal),abs(contemporaneous),abs(between)))
+qgraph(temporal, layout = "spring", theme = "colorblind",  vsize = 13, mar = rep(5,4), asize = 8,
+       directed = TRUE, labels = latLabels, maximum = max, esize = 10, edge.labels = FALSE,
+       filetype = "pdf", filename = "panelPDC",
+       vTrans = 254, loopRotation = loopRotation,
+       label.scale.equal = TRUE)
+
+qgraph(contemporaneous, layout = "spring", theme = "colorblind", vsize = 13, mar = rep(5,4), 
+       labels = latLabels, maximum = max, esize = 10, edge.labels = FALSE,
+       filetype = "pdf", filename = "panelPCC",
+       vTrans = 254, loopRotation = loopRotation,
+       label.scale.equal = TRUE)
+
+qgraph(between, layout = "spring", theme = "colorblind", vsize = 13, mar = rep(5,4), 
+       labels = latLabels, maximum = max, esize = 10, edge.labels = FALSE,
+       filetype = "pdf", filename = "panelBetween",
+       vTrans = 254, loopRotation = loopRotation,
+       label.scale.equal = TRUE)
+```
+
+```{r}
+### Make tables ###
+### Parameter estimates ###
+# Sanitize function:
+
+# Temporal:
+temporal_table <- temporal
+temporal_table[temporal_table==0] <- NA
+rownames(temporal_table) <- colnames(temporal_table) <- latLabels
+print(xtable(temporal_table,digits = 2), floating = FALSE, NA.string = ".")
+
+# Contemporaneous:
+contemporaneous_table <- contemporaneous
+
+# Add marginal correlations:
+contemporaneous_cors <- cov2cor(getmatrix(analysis, "sigma_zeta_within"))
+
+# Add to upper tri:
+contemporaneous_table[upper.tri(contemporaneous_table)] <- contemporaneous_cors[upper.tri(contemporaneous_cors)]
+
+# Make zeroes NA:
+contemporaneous_table[contemporaneous_table==0] <- NA
+
+rownames(contemporaneous_table) <- colnames(contemporaneous_table) <- latLabels
+print(xtable(contemporaneous_table,digits = 2), floating = FALSE, NA.string = ".")
+
+
+# Between:
+between_table <- between
+
+# Add marginal correlations:
+between_cors <- cov2cor(getmatrix(analysis, "sigma_zeta_between"))
+
+# Add to upper tri:
+between_table[upper.tri(between_table)] <- between_cors[upper.tri(between_cors)]
+
+# Make zeroes NA:
+between_table[between_table==0] <- NA
+
+rownames(between_table) <- colnames(between_table) <- latLabels
+print(xtable(between_table,digits = 2), floating = FALSE, NA.string = ".")
+```
+
