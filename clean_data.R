@@ -28,12 +28,19 @@ clean_data <- function(inp) {
   
   # Selects relevant variables
   df_clean <- select(df, c(
-    ID, yearID,
-    age, sex, wrkstat, degree, race,
-    eqwlth, marblk, marwht, marasian, marhisp, marhomo, 
-    socrel, socommun, socfrend, parsol, kidssol, goodlife,
-    fechld, fepresch, fefam, punsin, blkwhite, rotapple, permoral,
-    finrela, polviews, happy, news, relpersn, sprtprsn
+    ID, yearID, age, sex, wrkstat, degree, race, #demographics
+    marblk, marwht, marasian, marhisp, #attitude towards races
+    marhomo, #attitude towards gay marriage
+    socrel, socommun, socfrend, #social behavior
+    parsol, kidssol, goodlife, #standard of living
+    fechld, fepresch, fefam, #attitude towards mothers working
+    punsin, blkwhite, rotapple, permoral, #morals
+    relpersn, sprtprsn, #religousness
+    eqwlth, #equal wealth
+    finrela, #financials household
+    polviews, #political views
+    news, #news consumption
+    happy #happiness
   ))
   
   # Removes variables which have all Na's in one year
