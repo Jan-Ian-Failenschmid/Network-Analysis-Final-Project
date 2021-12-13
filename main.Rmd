@@ -156,11 +156,11 @@ ECP[,2] <- 0
 #Latent Labels
 latLabels <-  c("Racial Attitudes (RA)", "Gay Attitudes (GA)", "Social Behaviour (SB)",
                "Living Standard (LS)", "Working Mothers (WM)", "Morals (M)", "Religiounsess (R)",
-               "Equal Wealth (EW)", "Finance Household (FH)", "Political Views (PV)", 
-               "News Consumption (NC)")
+               "Equal Wealth (EW)", "Political Views (PV)", 
+               "News Consumption (NC)", "Happiness (H)")
 
 #Manifest Labels
-manLabels <- names(df_clean[8:32])
+manLabels <- names(df_clean[8:30])
 
 # Size of labels:
 labelCex <- c(
@@ -218,7 +218,7 @@ loopRotation[3] <- 0.8 * pi
 latLabels <-  c(
   "RA", "GA", "SB",
   "LS", "WM", "M", "R",
-  "EW", "FH", "PV"
+  "EW", "PV", "NC", "H"
 )
 ```
 
