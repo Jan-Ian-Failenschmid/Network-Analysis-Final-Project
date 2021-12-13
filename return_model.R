@@ -1,12 +1,12 @@
 return_model <- function(df) {
   
   #Extracts Variable Names
-  var_names <- names(df_clean[8:32])
+  var_names <- names(df[8:32])
   
   #Split up Data by year
-  df2006 <- df_clean[df$yearID == 2006, c("ID", var_names)]
-  df2008 <- df_clean[df$yearID == 2008, c("ID", var_names)]
-  df2010 <- df_clean[df$yearID == 2010, c("ID", var_names)]
+  df2006 <- df[df$yearID == 2006, c("ID", var_names)]
+  df2008 <- df[df$yearID == 2008, c("ID", var_names)]
+  df2010 <- df[df$yearID == 2010, c("ID", var_names)]
   
   #Add Year Identifier to variable names
   names(df2006) <- paste(names(df2006), "2006", sep = "_")
