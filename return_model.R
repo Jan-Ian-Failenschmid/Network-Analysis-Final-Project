@@ -1,7 +1,7 @@
 return_model <- function(df) {
-  
+  df <- df_clean
   #Extracts Variable Names
-  var_names <- names(df[8:32])
+  var_names <- names(df[8:30])
   
   #Split up Data by year
   df2006 <- df[df$yearID == 2006, c("ID", var_names)]
@@ -23,37 +23,38 @@ return_model <- function(df) {
   #Calculate and defines model specifications (provisional)
   covMat <- cov(df_overall, use = "pairwise.complete.obs")
   nobs <- nrow(df_overall)
-  varMat <- matrix(names(df_overall), nrow = 25, ncol = 3, 
+  varMat <- matrix(names(df_overall), nrow = 23, ncol = 3, 
                    dimnames = list(var_names, c("V1", "V2", "V3")))
   lambda <- matrix(c(
-    0,0,1,0,0,0,0,
-    1,0,0,0,0,0,0,
-    1,0,0,0,0,0,0,
-    1,0,0,0,0,0,0,
-    1,0,0,0,0,0,0,
-    1,0,0,0,1,0,0,
-    0,1,0,0,1,0,0,
-    0,1,0,0,0,1,0,
-    0,1,0,0,0,0,0,
-    0,0,1,0,1,0,0,
-    0,0,1,0,0,0,0,
-    0,0,1,0,0,0,0,
-    0,0,0,1,0,0,0,
-    0,0,0,1,0,0,0,
-    0,0,0,1,0,0,0,
-    0,0,0,0,1,0,0,
-    0,0,0,0,0,1,0,
-    0,0,0,0,0,1,0,
-    0,0,0,0,0,1,0,
-    0,0,1,0,0,0,0,
-    0,0,0,0,0,0,1,
-    0,0,1,0,0,0,0,
-    0,0,0,0,0,0,1,
-    0,0,0,0,1,0,0,
-    0,0,0,0,1,0,0
-  ), ncol = 7, nrow = 25, byrow = T)
-  latents <- c("Racial/Homosexual Attitudes", "Time with Others", "Standard of Living",
-               "Attitude Towards Mothers Working", "Religiousness", "Morals", "Politics/News")
+    1,0,0,0,0,0,0,0,0,0,0,
+    1,0,0,0,0,0,0,0,0,0,0,
+    1,0,0,0,0,0,0,0,0,0,0,
+    0,1,0,0,0,0,0,0,0,0,0,
+    0,0,1,0,0,0,0,0,0,0,0,
+    0,0,1,0,0,0,0,0,0,0,0,
+    0,0,1,0,0,0,0,0,0,0,0,
+    0,0,0,1,0,0,0,0,0,0,0,
+    0,0,0,1,0,0,0,0,0,0,0,
+    0,0,0,1,0,0,0,0,0,0,0,
+    0,0,0,0,1,0,0,0,0,0,0,
+    0,0,0,0,1,0,0,0,0,0,0,
+    0,0,0,0,1,0,0,0,0,0,0,
+    0,0,0,0,0,1,0,0,0,0,0,
+    0,0,0,0,0,1,0,0,0,0,0,
+    0,0,0,0,0,1,0,0,0,0,0,
+    0,0,0,0,0,1,0,0,0,0,0,
+    0,0,0,0,0,0,1,0,0,0,0,
+    0,0,0,0,0,0,1,0,0,0,0,
+    0,0,0,0,0,0,0,1,0,0,0,
+    0,0,0,0,0,0,0,0,1,0,0,
+    0,0,0,0,0,0,0,0,0,1,0,
+    0,0,0,0,0,0,0,0,0,0,1
+  ), ncol = 11, nrow = 23, byrow = T)
+  
+  latents <- c("Racial Attitudes", "Gay Attitudes", "Social Behaviour",
+               "Living Standard", "Working Mothers", "Morals", 
+               "Religiounsess", "Equal Wealth", 
+               "Political Views", "News Consumption", "Happiness")
   
   #Defines Model
   model <- dlvm1(

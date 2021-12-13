@@ -29,7 +29,7 @@ clean_data <- function(inp) {
   # Selects relevant variables
   df_clean <- select(df, c(
     ID, yearID, age, sex, wrkstat, degree, race, #demographics
-    marblk, marwht, marasian, marhisp, #attitude towards races
+    marblk, marasian, marhisp, #attitude towards races
     marhomo, #attitude towards gay marriage
     socrel, socommun, socfrend, #social behavior
     parsol, kidssol, goodlife, #standard of living
@@ -37,7 +37,6 @@ clean_data <- function(inp) {
     punsin, blkwhite, rotapple, permoral, #morals
     relpersn, sprtprsn, #religousness
     eqwlth, #equal wealth
-    finrela, #financials household
     polviews, #political views
     news, #news consumption
     happy #happiness
@@ -67,7 +66,7 @@ clean_data <- function(inp) {
   data_age3 <- data_age2[which(data_age2$ID %in% ind_age3$ID),]
   
   # Drop observations with too much missing data
-  df_rows <- data_age3[which(rowMeans(!is.na(data_age3[ ,8:32])) > 0.50), ]
+  df_rows <- data_age3[which(rowMeans(!is.na(data_age3[ ,8:30])) > 0.50), ]
   
   # Get subjects with observations in all years 
   ID_all <- df_rows %>%
