@@ -1,4 +1,4 @@
-clean_data <- function(inp) {
+clean_data <- function(inp, age_lim = 67) {
   
   # Loads the data
   raw_df <- read_spss(inp)
@@ -56,13 +56,13 @@ clean_data <- function(inp) {
   df_clean <- filter(df_clean, !df_clean$ID %in% exclude)
   
   # Exclude people outside the working range
-  ind_age <- df_clean[which(df_clean$yearID == 2006 & df_clean$age < 63),]
+  ind_age <- df_clean[which(df_clean$yearID == 2006 & df_clean$age < (age_lim - 4)),]
   data_age <- df_clean[which(df_clean$ID %in% ind_age$ID),]
   
-  ind_age2 <- data_age[which(data_age$yearID == 2008 & data_age$age < 65),]
+  ind_age2 <- data_age[which(data_age$yearID == 2008 & data_age$age < (age_lim - 2)),]
   data_age2 <- data_age[which(data_age$ID %in% ind_age2$ID),]
   
-  ind_age3 <- data_age2[which(data_age2$yearID == 2010 & data_age2$age < 67),]
+  ind_age3 <- data_age2[which(data_age2$yearID == 2010 & data_age2$age < age_lim),]
   data_age3 <- data_age2[which(data_age2$ID %in% ind_age3$ID),]
   
   # Drop observations with too much missing data
