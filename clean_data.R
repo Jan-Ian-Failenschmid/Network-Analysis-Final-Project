@@ -35,11 +35,11 @@ clean_data <- function(inp, age_lim = 67) {
     parsol, kidssol, goodlife, #standard of living
     fechld, fepresch, fefam, #attitude towards mothers working
     punsin, blkwhite, rotapple, permoral, #morals
-    relpersn, sprtprsn, #religousness
-    eqwlth, #equal wealth
+    relpersn, sprtprsn, #religiousness
+    #eqwlth, #equal wealth
     polviews, #political views
-    news, #news consumption
-    happy #happiness
+    news #news consumption
+    #happy #happiness
   ))
   
   # Removes variables which have all Na's in one year
@@ -66,7 +66,7 @@ clean_data <- function(inp, age_lim = 67) {
   data_age3 <- data_age2[which(data_age2$ID %in% ind_age3$ID),]
   
   # Drop observations with too much missing data
-  df_rows <- data_age3[which(rowMeans(!is.na(data_age3[ ,8:30])) > 0.50), ]
+  df_rows <- data_age3[which(rowMeans(!is.na(data_age3[ ,8:ncol(data_age3)])) > 0.50), ]
   
   # Get subjects with observations in all years 
   ID_all <- df_rows %>%
