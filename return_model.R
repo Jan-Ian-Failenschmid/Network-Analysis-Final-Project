@@ -1,7 +1,7 @@
 return_model <- function(df) {
   df <- df_clean
   #Extracts Variable Names
-  var_names <- names(df[8:30])
+  var_names <- names(df[8:ncol(df)])
   
   #Split up Data by year
   df2006 <- df[df$yearID == 2006, c("ID", var_names)]
@@ -21,9 +21,9 @@ return_model <- function(df) {
   df_overall <- df_overall[, which(names(df_overall) != "ID_2006")]
   
   #Calculate and defines model specifications (provisional)
-  covMat <- cov(df_overall, use = "pairwise.complete.obs")
   nobs <- nrow(df_overall)
-  varMat <- matrix(names(df_overall), nrow = 23, ncol = 3, 
+  covMat <- ((nobs-1)/nobs)*cov(df_overall, use = "pairwise.complete.obs")
+  varMat <- matrix(names(df_overall), nrow = 21, ncol = 3, 
                    dimnames = list(var_names, c("V1", "V2", "V3")))
   lambda <- matrix(c(
     1,0,0,0,0,0,0,0,0,0,0,
@@ -46,15 +46,12 @@ return_model <- function(df) {
     0,0,0,0,0,0,1,0,0,0,0,
     0,0,0,0,0,0,1,0,0,0,0,
     0,0,0,0,0,0,0,1,0,0,0,
-    0,0,0,0,0,0,0,0,1,0,0,
-    0,0,0,0,0,0,0,0,0,1,0,
-    0,0,0,0,0,0,0,0,0,0,1
-  ), ncol = 11, nrow = 23, byrow = T)
+    0,0,0,0,0,0,0,0,1,0,0
+  ), ncol = 9, nrow = 21, byrow = T)
   
   latents <- c("Racial Attitudes", "Gay Attitudes", "Social Behaviour",
-               "Living Standard", "Working Mothers", "Morals", 
-               "Religiounsess", "Equal Wealth", 
-               "Political Views", "News Consumption", "Happiness")
+               "Living Standard", "Working Mothers","Morals", 
+               "Religiousness", "Political Views", "News Consumption")
   
   #Defines Model
   model <- dlvm1(
