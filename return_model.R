@@ -46,7 +46,7 @@ return_model <- function(df) {
     0,0,0,0,0,0,1,0,0,
     0,0,0,0,0,0,1,0,0,
     0,0,0,0,0,0,0,1,0,
-    0,0,0,0,0,0,0,0,1,
+    0,0,0,0,0,0,0,0,1
   ), ncol = 9, nrow = 21, byrow = T)
   
   latents <- c("Racial Attitudes", "Gay Attitudes", "Social Behaviour",
