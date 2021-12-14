@@ -23,35 +23,38 @@ return_model <- function(df) {
   #Calculate and defines model specifications (provisional)
   nobs <- nrow(df_overall)
   covMat <- ((nobs-1)/nobs)*cov(df_overall, use = "pairwise.complete.obs")
-  varMat <- matrix(names(df_overall), nrow = 21, ncol = 3, 
+  varMat <- matrix(names(df_overall), nrow = 23, ncol = 3, 
                    dimnames = list(var_names, c("V1", "V2", "V3")))
   lambda <- matrix(c(
-    1,0,0,0,0,0,0,0,0,
-    1,0,0,0,0,0,0,0,0,
-    1,0,0,0,0,0,0,0,0,
-    0,1,0,0,0,0,0,0,0,
-    0,0,1,0,0,0,0,0,0,
-    0,0,1,0,0,0,0,0,0,
-    0,0,1,0,0,0,0,0,0,
-    0,0,0,1,0,0,0,0,0,
-    0,0,0,1,0,0,0,0,0,
-    0,0,0,1,0,0,0,0,0,
-    0,0,0,0,1,0,0,0,0,
-    0,0,0,0,1,0,0,0,0,
-    0,0,0,0,1,0,0,0,0,
-    0,0,0,0,0,1,0,0,0,
-    0,0,0,0,0,1,0,0,0,
-    0,0,0,0,0,1,0,0,0,
-    0,0,0,0,0,1,0,0,0,
-    0,0,0,0,0,0,1,0,0,
-    0,0,0,0,0,0,1,0,0,
-    0,0,0,0,0,0,0,1,0,
-    0,0,0,0,0,0,0,0,1
-  ), ncol = 9, nrow = 21, byrow = T)
+    1,0,0,0,0,0,0,0,0,0,0,
+    1,0,0,0,0,0,0,0,0,0,0,
+    1,0,0,0,0,0,0,0,0,0,0,
+    0,1,0,0,0,0,0,0,0,0,0,
+    0,0,1,0,0,0,0,0,0,0,0,
+    0,0,1,0,0,0,0,0,0,0,0,
+    0,0,1,0,0,0,0,0,0,0,0,
+    0,0,0,1,0,0,0,0,0,0,0,
+    0,0,0,1,0,0,0,0,0,0,0,
+    0,0,0,1,0,0,0,0,0,0,0,
+    0,0,0,0,1,0,0,0,0,0,0,
+    0,0,0,0,1,0,0,0,0,0,0,
+    0,0,0,0,1,0,0,0,0,0,0,
+    0,0,0,0,0,1,0,0,0,0,0,
+    0,0,0,0,0,1,0,0,0,0,0,
+    0,0,0,0,0,1,0,0,0,0,0,
+    0,0,0,0,0,1,0,0,0,0,0,
+    0,0,0,0,0,0,1,0,0,0,0,
+    0,0,0,0,0,0,1,0,0,0,0,
+    0,0,0,0,0,0,0,1,0,0,0,
+    0,0,0,0,0,0,0,0,1,0,0,
+    0,0,0,0,0,0,0,0,0,1,0,
+    0,0,0,0,0,0,0,0,0,0,1
+  ), ncol = 11, nrow = 23, byrow = T)
   
   latents <- c("Racial Attitudes", "Gay Attitudes", "Social Behaviour",
-               "Living Standard", "Working Mothers","Morals", 
-               "Religiousness", "Political Views", "News Consumption")
+               "Living Standard", "Working Mothers", "Morals", 
+               "Religiousness", "Equal Wealth", 
+               "Political Views", "News Consumption", "Happiness")
   
   #Defines Model
   model <- dlvm1(
