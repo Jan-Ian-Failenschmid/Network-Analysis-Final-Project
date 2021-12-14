@@ -19,8 +19,8 @@ sapply(c("clean_data.r", "return_model.r", "model_search_algorithm.r",
          "helperFunctions.R"), source)
 ```
 
-```{r, warning=FALSE}
-df_clean <- clean_data("GSS_panel06w123_R6a - SPSS.sav", age_lim = 48)
+```{r, warning = FALSE}
+df_clean <- clean_data("GSS_panel06w123_R6a - SPSS.sav")
 ```
 
 **Table 1**  
@@ -155,11 +155,12 @@ ECP[,2] <- 0
 
 #Latent Labels
 latLabels <-  c("Racial Attitudes (RA)", "Gay Attitudes (GA)", "Social Behaviour (SB)",
-               "Living Standard (LS)", "Working Mothers (WM)", "Morals (M)",
-               "Religiousness (R)","Political Views (PV)", "News Consumption (NC)")
+               "Living Standard (LS)", "Working Mothers (WM)", "Morals (M)", "Religiousness (R)",
+               "Equal Wealth (EW)", "Political Views (PV)", 
+               "News Consumption (NC)", "Happiness (H)")
 
 #Manifest Labels
-manLabels <- names(df_clean[8:ncol(df_clean)])
+manLabels <- names(df_clean[8:30])
 
 # Size of labels:
 labelCex <- c(
