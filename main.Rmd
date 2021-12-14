@@ -19,8 +19,8 @@ sapply(c("clean_data.r", "return_model.r", "model_search_algorithm.r",
          "helperFunctions.R"), source)
 ```
 
-```{r}
-df_clean <- clean_data("data/GSS_panel06w123_R6a - SPSS.sav")
+```{r, warning=FALSE}
+df_clean <- clean_data("GSS_panel06w123_R6a - SPSS.sav", age_lim = 48)
 ```
 
 **Table 1**  
@@ -34,9 +34,9 @@ kable(describe(df_clean[df_clean$yearID == 2010, 3:7]))
 **Table 2**  
 *Descriptives of the Analysis Variables by Year*
 ```{r}
-kable(describe(df_clean[df_clean$yearID == 2006, 8:32]))  
-kable(describe(df_clean[df_clean$yearID == 2008, 8:32]))
-kable(describe(df_clean[df_clean$yearID == 2010, 8:32]))
+kable(describe(df_clean[df_clean$yearID == 2006, 8:ncol(df_clean)]))  
+kable(describe(df_clean[df_clean$yearID == 2008, 8:ncol(df_clean)]))
+kable(describe(df_clean[df_clean$yearID == 2010, 8:ncol(df_clean)]))
 ```
 
 **Graph 1**  
@@ -64,19 +64,19 @@ ggplot(gather(df_clean[df_clean$yearID == 2010, 3:7]), aes(value)) +
 **Graph 2**  
 *Histograms of Analysis Variables by Year*
 ```{r, warning = FALSE}
-ggplot(gather(df_clean[df_clean$yearID == 2006, 8:32]), aes(value)) +
+ggplot(gather(df_clean[df_clean$yearID == 2006, 8:ncol(df_clean)]), aes(value)) +
   geom_histogram() +
   facet_wrap(~key, scales = "free_x") +
   theme_classic() + 
   xlab("Response")
 
-ggplot(gather(df_clean[df_clean$yearID == 2008, 8:32]), aes(value)) +
+ggplot(gather(df_clean[df_clean$yearID == 2008, 8:ncol(df_clean)]), aes(value)) +
   geom_histogram() +
   facet_wrap(~key, scales = "free_x") +
   theme_classic() + 
   xlab("Response")
 
-ggplot(gather(df_clean[df_clean$yearID == 2010, 8:32]), aes(value)) +
+ggplot(gather(df_clean[df_clean$yearID == 2010, 8:ncol(df_clean)]), aes(value)) +
   geom_histogram() +
   facet_wrap(~key, scales = "free_x") +
   theme_classic() + 
@@ -155,12 +155,11 @@ ECP[,2] <- 0
 
 #Latent Labels
 latLabels <-  c("Racial Attitudes (RA)", "Gay Attitudes (GA)", "Social Behaviour (SB)",
-               "Living Standard (LS)", "Working Mothers (WM)", "Morals (M)", "Religiounsess (R)",
-               "Equal Wealth (EW)", "Political Views (PV)", 
-               "News Consumption (NC)", "Happiness (H)")
+               "Living Standard (LS)", "Working Mothers (WM)", "Morals (M)",
+               "Religiousness (R)","Political Views (PV)", "News Consumption (NC)")
 
 #Manifest Labels
-manLabels <- names(df_clean[8:30])
+manLabels <- names(df_clean[8:ncol(df_clean)])
 
 # Size of labels:
 labelCex <- c(
