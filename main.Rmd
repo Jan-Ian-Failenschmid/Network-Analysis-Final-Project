@@ -20,7 +20,7 @@ sapply(c("clean_data.r", "return_model.r", "model_search_algorithm.r",
 ```
 
 ```{r, warning = FALSE}
-df_clean <- clean_data("GSS_panel06w123_R6a - SPSS.sav")
+df_clean <- clean_data("data/GSS_panel06w123_R6a - SPSS.sav")
 ```
 
 **Table 1**  
