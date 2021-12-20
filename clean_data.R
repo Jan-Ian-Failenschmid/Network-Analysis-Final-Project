@@ -39,7 +39,7 @@ clean_data <- function(inp, age_min = 18, age_max = 67, set1 = T) {
       polviews, #political views
       news, #news consumption
       happy #happiness
-    ))
+  ))
   }else{
     df_clean <- select(df, c(
       ID, yearID, age, sex, wrkstat, degree, race, #demographics
@@ -77,7 +77,7 @@ clean_data <- function(inp, age_min = 18, age_max = 67, set1 = T) {
   data_age3 <- data_age2[which(data_age2$ID %in% ind_age3$ID),]
   
   # Drop observations with too much missing data
-  df_rows <- data_age3[which(rowMeans(!is.na(data_age3[ ,8:ncol(data_age3)])) > 0.3), ]
+  df_rows <- data_age3[which(rowMeans(!is.na(data_age3[ ,8:ncol(data_age3)])) > 0.75), ]
   
   # Get subjects with observations in all years 
   ID_all <- df_rows %>%
