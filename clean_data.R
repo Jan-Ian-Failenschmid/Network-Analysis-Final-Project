@@ -1,4 +1,4 @@
-clean_data <- function(inp, age_lim = 67) {
+clean_data <- function(inp, age_min = 18, age_max = 67, set1 = T) {
   
   # Loads the data
   raw_df <- read_spss(inp)
@@ -27,20 +27,31 @@ clean_data <- function(inp, age_lim = 67) {
   df <- bind_rows(df2006, df2008, df2010)
   
   # Selects relevant variables
-  df_clean <- select(df, c(
-    ID, yearID, age, sex, wrkstat, degree, race, #demographics
-    marblk, marasian, marhisp, #attitude towards races
-    marhomo, #attitude towards gay marriage
-    socrel, socommun, socfrend, #social behavior
-    parsol, kidssol, goodlife, #standard of living
-    fechld, fepresch, fefam, #attitude towards mothers working
-    punsin, blkwhite, rotapple, permoral, #morals
-    relpersn, sprtprsn, #religiousness
-    eqwlth, #equal wealth
-    polviews, #political views
-    news, #news consumption
-    happy #happiness
-  ))
+  if(set1){
+    df_clean <- select(df, c(
+      ID, yearID, age, sex, wrkstat, degree, race, #demographics
+      marblk, marasian, marhisp, #attitude towards races
+      marhomo, #attitude towards gay marriage
+      socrel, socommun, socfrend, #social behavior
+      fechld, fepresch, fefam, #attitude towards mothers working
+      punsin, blkwhite, rotapple, permoral, #morals
+      relpersn, sprtprsn, #religiousness
+      polviews, #political views
+      news, #news consumption
+      happy #happiness
+    ))
+  }else{
+    df_clean <- select(df, c(
+      ID, yearID, age, sex, wrkstat, degree, race, #demographics
+      nextgen, toofast, advfront, #attitude science
+      parsol, goodlife, kidssol, #standard of living
+      punsin, blkwhite, rotapple, permoral, #morals
+      relpersn, sprtprsn, #religiousness
+      eqwlth, #equal wealth
+      polviews, #political views
+      happy #happiness
+    ))
+  }
   
   # Removes variables which have all Na's in one year
   df_clean <- select(df_clean, !unique(c(
@@ -56,17 +67,17 @@ clean_data <- function(inp, age_lim = 67) {
   df_clean <- filter(df_clean, !df_clean$ID %in% exclude)
   
   # Exclude people outside the working range
-  ind_age <- df_clean[which(df_clean$yearID == 2006 & df_clean$age < (age_lim - 4)),]
+  ind_age <- df_clean[which(df_clean$yearID == 2006 & df_clean$age <= (age_max - 4) & df_clean$age >= age_min),]
   data_age <- df_clean[which(df_clean$ID %in% ind_age$ID),]
   
-  ind_age2 <- data_age[which(data_age$yearID == 2008 & data_age$age < (age_lim - 2)),]
+  ind_age2 <- data_age[which(data_age$yearID == 2008 & data_age$age <=(age_max - 2) & df_clean$age >= (age_min+2)),]
   data_age2 <- data_age[which(data_age$ID %in% ind_age2$ID),]
   
-  ind_age3 <- data_age2[which(data_age2$yearID == 2010 & data_age2$age < age_lim),]
+  ind_age3 <- data_age2[which(data_age2$yearID == 2010 & data_age2$age <= age_max & df_clean$age >= (age_min+4)),]
   data_age3 <- data_age2[which(data_age2$ID %in% ind_age3$ID),]
   
   # Drop observations with too much missing data
-  df_rows <- data_age3[which(rowMeans(!is.na(data_age3[ ,8:ncol(data_age3)])) > 0.5), ]
+  df_rows <- data_age3[which(rowMeans(!is.na(data_age3[ ,8:ncol(data_age3)])) > 0.3), ]
   
   # Get subjects with observations in all years 
   ID_all <- df_rows %>%
