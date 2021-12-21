@@ -1,4 +1,4 @@
-clean_data <- function(inp, age_lim = 67) {
+clean_data <- function(inp, age_min = 18, age_max = 67) {
   
   # Loads the data
   raw_df <- read_spss(inp)
@@ -32,16 +32,14 @@ clean_data <- function(inp, age_lim = 67) {
     marblk, marasian, marhisp, #attitude towards races
     marhomo, #attitude towards gay marriage
     socrel, socommun, socfrend, #social behavior
-    parsol, kidssol, goodlife, #standard of living
     fechld, fepresch, fefam, #attitude towards mothers working
     punsin, blkwhite, rotapple, permoral, #morals
-    relpersn, sprtprsn, #religousness
-    eqwlth, #equal wealth
+    relpersn, sprtprsn, #religiousness
     polviews, #political views
     news, #news consumption
     happy #happiness
   ))
-  
+    
   # Removes variables which have all Na's in one year
   df_clean <- select(df_clean, !unique(c(
     names(colSums(!is.na(df_clean[df_clean$yearID == 2006, ]))[colSums(!is.na(df_clean[df_clean$yearID == 2006, ])) == 0]),
@@ -56,17 +54,17 @@ clean_data <- function(inp, age_lim = 67) {
   df_clean <- filter(df_clean, !df_clean$ID %in% exclude)
   
   # Exclude people outside the working range
-  ind_age <- df_clean[which(df_clean$yearID == 2006 & df_clean$age < (age_lim - 4)),]
+  ind_age <- df_clean[which(df_clean$yearID == 2006 & df_clean$age <= (age_max - 4) & df_clean$age >= age_min),]
   data_age <- df_clean[which(df_clean$ID %in% ind_age$ID),]
   
-  ind_age2 <- data_age[which(data_age$yearID == 2008 & data_age$age < (age_lim - 2)),]
+  ind_age2 <- data_age[which(data_age$yearID == 2008 & data_age$age <=(age_max - 2) & df_clean$age >= (age_min+2)),]
   data_age2 <- data_age[which(data_age$ID %in% ind_age2$ID),]
   
-  ind_age3 <- data_age2[which(data_age2$yearID == 2010 & data_age2$age < age_lim),]
+  ind_age3 <- data_age2[which(data_age2$yearID == 2010 & data_age2$age <= age_max & df_clean$age >= (age_min+4)),]
   data_age3 <- data_age2[which(data_age2$ID %in% ind_age3$ID),]
   
   # Drop observations with too much missing data
-  df_rows <- data_age3[which(rowMeans(!is.na(data_age3[ ,8:30])) > 0.50), ]
+  df_rows <- data_age3[which(rowMeans(!is.na(data_age3[ ,8:ncol(data_age3)])) > 0.75), ]
   
   # Get subjects with observations in all years 
   ID_all <- df_rows %>%

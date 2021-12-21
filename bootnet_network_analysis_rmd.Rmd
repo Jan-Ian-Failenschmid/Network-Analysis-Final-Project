@@ -1,0 +1,351 @@
+---
+title: "Network Analysis Results"
+author: "Jan Failenschmid (13869159), Daniel van der Meer (12227056), Dana Sleiffer (12767298)"
+date: "15.12.2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library('tidyverse')
+library('haven')
+library('psych')
+library('knitr')
+library('qgraph')
+library("NetworkComparisonTest")
+library('bootnet')
+sapply(c('clean_data.r'), source)
+```
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+set.seed(42)
+```
+
+## Summary 
+We estimated three networks to investigate variable relations for a subset of the General Society Survey (GSS) data set. Specifically, we looked at variables measuring: 
+- attitude towards races  
+- attitude towards gay marriage  
+- social behavior  
+- standard of living  
+- attitude towards mothers working  
+- morals  
+- religiousness  
+- equal wealth  
+- political views  
+- news consumption
+- happiness  
+
+We estimated networks for the years 2006, 2008 and 2010. We then pruned the model, performed bootstraps and investigated model statistics. 
+Resulting bootstrapped confidence intervals and edge differences can be seen below. The bootstrapped samples show good correlations with the original samples in terms of betweenness, closeness and strength for all three networks.  
+A network comparison between the networks of 2006, 2008 and 2010 shows no significant difference between the overall structure. When comparing the 2006 and 2008 networks, tests for specific edges show significant differences for the edges between "marasian"-"marhomo", "marasian"-"parsol", "marblk"-"fefam", and "rotapple"-"sprtprsn". For the networks of 2008 and 2010, the edges between "goodlife" and "eqwlth" seems to differ between the two networks.
+
+```{r, include=FALSE}
+df_clean <- clean_data("data/GSS_panel06w123_R6a - SPSS.sav")
+```
+
+# Descriptives
+
+**Table 1**  
+*Descriptives of the Sample Demographics by Year*
+```{r}
+kable(describe(df_clean[df_clean$yearID == 2006, 3:7]))
+kable(describe(df_clean[df_clean$yearID == 2008, 3:7]))
+kable(describe(df_clean[df_clean$yearID == 2010, 3:7]))
+```
+  
+**Table 2**  
+*Descriptives of the Analysis Variables by Year*
+```{r}
+kable(describe(df_clean[df_clean$yearID == 2006, 8:ncol(df_clean)]))  
+kable(describe(df_clean[df_clean$yearID == 2008, 8:ncol(df_clean)]))
+kable(describe(df_clean[df_clean$yearID == 2010, 8:ncol(df_clean)]))
+```
+
+**Figure 1**  
+*Histograms of Sample Demographics by Year*
+```{r, warning = FALSE}
+ggplot(gather(df_clean[df_clean$yearID == 2006, 3:7]), aes(value)) +
+  geom_histogram() +
+  facet_wrap(~key, scales = "free_x") +
+  theme_classic() + 
+  xlab("Response")
+
+ggplot(gather(df_clean[df_clean$yearID == 2008, 3:7]), aes(value)) +
+  geom_histogram() +
+  facet_wrap(~key, scales = "free_x") +
+  theme_classic() + 
+  xlab("Response")
+
+ggplot(gather(df_clean[df_clean$yearID == 2010, 3:7]), aes(value)) +
+  geom_histogram() +
+  facet_wrap(~key, scales = "free_x") +
+  theme_classic() + 
+  xlab("Response")
+```
+
+**Figure 2**  
+*Histograms of Analysis Variables by Year*
+```{r, warning = FALSE}
+ggplot(gather(df_clean[df_clean$yearID == 2006, 8:ncol(df_clean)]), aes(value)) +
+  geom_histogram() +
+  facet_wrap(~key, scales = "free_x") +
+  theme_classic() + 
+  xlab("Response")
+
+ggplot(gather(df_clean[df_clean$yearID == 2008, 8:ncol(df_clean)]), aes(value)) +
+  geom_histogram() +
+  facet_wrap(~key, scales = "free_x") +
+  theme_classic() + 
+  xlab("Response")
+
+ggplot(gather(df_clean[df_clean$yearID == 2010, 8:ncol(df_clean)]), aes(value)) +
+  geom_histogram() +
+  facet_wrap(~key, scales = "free_x") +
+  theme_classic() + 
+  xlab("Response")
+```
+
+\newpage
+
+# Network Analysis
+
+```{r, include=FALSE}
+df <- df_clean
+#Set Number of Bootstrap Samples to be drawn Start Low and Gradually increase
+nrboot <- 300 
+#Set Number of Cores to be used for the Bootstrappings
+nrcor <- 1
+#Select Variables to be Included
+var_names <- names(df[8:ncol(df_clean)])
+
+#Split up Data by year
+df2006 <- df[df$yearID == 2006, c(var_names)]
+df2008 <- df[df$yearID == 2008, c(var_names)]
+df2010 <- df[df$yearID == 2010, c(var_names)]
+
+#Estimate Network by Year
+network2006 <- estimateNetwork(df2006, default = "EBICglasso")
+network2008 <- estimateNetwork(df2008, default = "EBICglasso")
+network2010 <- estimateNetwork(df2010, default = "EBICglasso")
+
+#Set max for all networks for Comparability
+maxi <- max(abs(c(network2006$graph[lower.tri(network2006$graph, diag = F)],
+         network2008$graph[lower.tri(network2008$graph, diag = F)],
+         network2010$graph[lower.tri(network2010$graph, diag = F)])))
+
+avrgLayout <- averageLayout(network2006, network2008, network2010)
+
+#Non Parametric Bootstrap
+boot_nonparametric_2006 <- bootnet(network2006, nBoots = nrboot, nCores = nrcor)
+boot_nonparametric_2008 <- bootnet(network2008, nBoots = nrboot, nCores = nrcor)
+boot_nonparametric_2010 <- bootnet(network2010, nBoots = nrboot, nCores = nrcor)
+
+#Draw Casedrop Bootstraps
+boot_casedrop_2006 <- bootnet(network2006, 
+                               nBoots = nrboot, 
+                               nCores = nrcor, 
+                               type = "case", 
+                              statistics = c("strength", "betweenness", "closeness")
+                               )
+boot_casedrop_2008 <- bootnet(network2008, 
+                              nBoots = nrboot, 
+                              nCores = nrcor, 
+                              type = "case", 
+                              statistics = c("strength", "betweenness", "closeness")
+)
+boot_casedrop_2010 <- bootnet(network2010, 
+                              nBoots = nrboot, 
+                              nCores = nrcor, 
+                              type = "case",
+                              statistics = c("strength", "betweenness", "closeness")
+)
+```
+
+## Network for 2006
+
+**Figure 3**  
+*Network for 2006*
+```{r}
+#Plot the networks
+plot(network2006, layout = avrgLayout, maximum = maxi)
+```
+
+\newpage
+
+**Figure 4**  
+*Bootstrapped Confidence Intervals for the Edges*
+```{r}
+#Plot Bootstrapped CI's
+plot(boot_nonparametric_2006, order = "sample", labels = F)
+```
+
+\newpage
+
+**Figure 5**  
+*Bootstrapped Edge Differrence*
+```{r}
+#Plot Bootstrapped Differnece
+plot(boot_nonparametric_2006, plot = "difference", onlyNonZero = TRUE, order = "sample")
+```
+
+\newpage
+
+**Figure 6**  
+*Case-Drop Bootstrapp Centrality Measures Stability Plot*
+```{r}
+#Stability Plot
+plot(boot_casedrop_2006, statistics = c("strength", "betweenness", "closeness"))
+```
+
+**Cor-Stability Analysis**
+```{r}
+corStability(boot_casedrop_2006)
+```
+
+\newpage
+
+## Network for 2008
+
+**Figure 7**  
+*Network for 2008*
+```{r}
+#Plot the networks
+plot(network2008, layout = avrgLayout, maximum = maxi)
+```
+
+\newpage
+
+**Figure 8**  
+*Bootstrapped Confidence Intervals for the Edges*
+```{r}
+#Plot Bootstrapped CI's
+plot(boot_nonparametric_2008, order = "sample", labels = F)
+```
+
+\newpage
+
+**Figure 9**  
+*Bootstrapped Edge Differrence*
+```{r}
+#Plot Bootstrapped Differnece
+plot(boot_nonparametric_2008, plot = "difference", onlyNonZero = TRUE, order = "sample")
+```
+
+\newpage
+
+**Figure 10**  
+*Case-Drop Bootstrapp Centrality Measures Stability Plot*
+```{r}
+#Stability Plot
+plot(boot_casedrop_2008, statistics = c("strength", "betweenness", "closeness"))
+```
+
+**Cor-Stability Analysis**
+```{r}
+corStability(boot_casedrop_2008)
+```
+
+\newpage
+
+## Network for 2010
+
+**Figure 11**  
+*Network for 2010*
+```{r}
+#Plot the networks
+plot(network2010, layout = avrgLayout, maximum = maxi)
+```
+
+\newpage
+
+**Figure 12**  
+*Bootstrapped Confidence Intervals for the Edges*
+```{r}
+#Plot Bootstrapped CI's
+plot(boot_nonparametric_2010, order = "sample", labels = F)
+```
+
+\newpage
+
+**Figure 13**  
+*Bootstrapped Edge Differrence*
+```{r}
+#Plot Bootstrapped Differnece
+plot(boot_nonparametric_2010, plot = "difference", onlyNonZero = TRUE, order = "sample")
+```
+
+\newpage
+
+**Figure 14**  
+*Case-Drop Bootstrapp Centrality Measures Stability Plot*
+```{r}
+#Stability Plot
+plot(boot_casedrop_2010, statistics = c("strength", "betweenness", "closeness"))
+```
+
+**Cor-Stability Analysis**
+```{r}
+corStability(boot_casedrop_2010)
+```
+
+\newpage
+
+# Network Comparison 
+## Network Comparison Test 1
+```{r, include=FALSE}
+###Network Comparison
+##Comparison 1
+Comparison1 <- NCT(network2006, network2008, test.edges = TRUE, edges = "all")
+```
+
+**Figure 14**  
+*Global Strength Test*
+```{r}
+# Global Strenght Test
+plot(Comparison1, what = "strength")
+```
+
+**Figure 15**  
+*Omnibus Test*
+```{r}
+# Omnibus Test
+plot(Comparison1, what = "network")
+```
+
+**Figure 16**  
+*Edge Difference Test Significant Edges*
+```{r}
+#Edge Difference Test
+kable(Comparison1$einv.pvals[which(Comparison1$einv.pvals[,3]<.0500),])
+```
+
+\newpage
+
+## Network Comparison Test 2
+```{r, include=FALSE}
+###Network Comparison
+##Comparison 1
+Comparison2 <- NCT(network2008, network2010, test.edges = TRUE, edges = "all")
+```
+
+**Figure 17**  
+*Global Strength Test*
+```{r}
+# Global Strength Test
+plot(Comparison2, what = "strength")
+```
+
+**Figure 18**  
+*Omnibus Test*
+```{r}
+# Omnibus Test
+plot(Comparison2, what = "network")
+```
+
+**Figure 19**  
+*Edge Difference Test Significant Edges*
+```{r}
+#Edge Difference Test
+kable(Comparison2$einv.pvals[which(Comparison2$einv.pvals[,3]<.0500),])
+```
